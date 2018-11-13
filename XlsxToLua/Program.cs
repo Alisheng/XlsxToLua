@@ -1058,7 +1058,12 @@ public class Program
                             if (errorString != null)
                                 Utils.LogErrorAndExit(string.Format("导出失败：\n{0}\n", errorString));
                             else
-                                Utils.Log("成功");
+                                Utils.Log("特殊lua导出成功");
+                            TableExportToJsonHelper.SpecialExportTableToJson(tableInfo, param, out errorString);
+                            if (errorString != null)
+                                Utils.LogErrorAndExit(string.Format("导出失败：\n{0}\n", errorString));
+                            else
+                                Utils.Log("特殊json导出成功");
                         }
                     }
                 }
@@ -1099,7 +1104,7 @@ public class Program
                         Utils.Log("额外导出为csv对应Java类文件成功");
                 }
                 // 判断是否要额外导出为json文件
-                if (AppValues.ExportJsonTableNames.Contains(tableName))
+                if (AppValues.ExportJsonTableNames.Contains(tableName) && isNeedExportOriginalTable == true)
                 {
                     TableExportToJsonHelper.ExportTableToJson(tableInfo, out errorString);
                     if (errorString != null)
