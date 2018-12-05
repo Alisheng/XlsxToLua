@@ -135,7 +135,7 @@ public class TableExportToJsonHelper
     }
 
     /// <summary>
-    /// 按配置的特殊索引导出方式输出lua文件（如果声明了在生成的lua文件开头以注释形式展示列信息，将生成更直观的嵌套字段信息，而不同于普通导出规则的列信息展示）
+    /// 按配置的特殊索引导出方式输出json文件（如果声明了在生成的json文件开头以注释形式展示列信息，将生成更直观的嵌套字段信息，而不同于普通导出规则的列信息展示）
     /// </summary>
     public static bool SpecialExportTableToJson(TableInfo tableInfo, string exportRule, out string errorString)
     {
@@ -346,10 +346,13 @@ public class TableExportToJsonHelper
             errorString = string.Format("错误：对表格{0}按\"{1}\"规则进行特殊索引导出时发现以下错误，导出被迫停止，请修正错误后重试：\n{2}\n", tableInfo.TableName, exportRule, errorString);
             return false;
         }
-
+        // 去掉最后一行后多余的英文逗号，此处要特殊处理当表格中没有任何数据行时的情况
+       if (content.Length > 1)
+        {
+            content.Remove(content.Length - 1, 1);
+        }
         // 生成数据内容结尾
         content.AppendLine("}");
-
         string exportString = content.ToString();
 
         // 如果声明了要整理为带缩进格式的形式
@@ -375,6 +378,7 @@ public class TableExportToJsonHelper
     /// </summary>
     private static void _GetIndexFieldData(StringBuilder content, Dictionary<object, object> parentDict, List<FieldInfo> tableValueField, ref int currentLevel, out string errorString)
     {
+        int keyCount = 0;
         foreach (var key in parentDict.Keys)
         {
             content.Append(_GetJsonIndentation(currentLevel));
@@ -403,7 +407,6 @@ public class TableExportToJsonHelper
 
             content.AppendLine(":{");
             ++currentLevel;
-
             // 如果已是最内层，输出指定object value中的数据
             if (parentDict[key].GetType() == typeof(int))
             {
@@ -417,11 +420,13 @@ public class TableExportToJsonHelper
                         return;
                     }
                     else
+                    {
+                        content.Append(_GetJsonIndentation(currentLevel));
                         content.Append(oneTableValueFieldData);
+                    }
                 }
             }
-            // 否则继续递归生成索引key
-            else
+            else// 否则继续递归生成索引key
             {
                 _GetIndexFieldData(content, (Dictionary<object, object>)(parentDict[key]), tableValueField, ref currentLevel, out errorString);
                 if (errorString != null)
@@ -429,8 +434,15 @@ public class TableExportToJsonHelper
             }
 
             --currentLevel;
+            // 去掉本行最后一个字段后多余的英文逗号，json语法不像lua那样最后一个字段后的逗号可有可无
+            content.Remove(content.Length - 1, 1);
             content.Append(_GetJsonIndentation(currentLevel));
-            content.AppendLine("},");
+            content.AppendLine("}");
+            keyCount++;
+            if (keyCount < parentDict.Count)//不是最后一层要加“，”
+            {
+                content.AppendLine(",");
+            }
         }
 
         errorString = null;

@@ -1056,14 +1056,14 @@ public class Program
                             Utils.Log(string.Format("对此表格按\"{0}\"自定义规则进行导出：", param));
                             TableExportToLuaHelper.SpecialExportTableToLua(tableInfo, param, out errorString);
                             if (errorString != null)
-                                Utils.LogErrorAndExit(string.Format("导出失败：\n{0}\n", errorString));
+                                Utils.LogErrorAndExit(string.Format("导出lua失败：\n{0}\n", errorString));
                             else
-                                Utils.Log("特殊lua导出成功");
+                                Utils.Log("导出lua成功");
                             TableExportToJsonHelper.SpecialExportTableToJson(tableInfo, param, out errorString);
                             if (errorString != null)
-                                Utils.LogErrorAndExit(string.Format("导出失败：\n{0}\n", errorString));
+                                Utils.LogErrorAndExit(string.Format("导出json失败：\n{0}\n", errorString));
                             else
-                                Utils.Log("特殊json导出成功");
+                                Utils.Log("导出json成功");
                         }
                     }
                 }
