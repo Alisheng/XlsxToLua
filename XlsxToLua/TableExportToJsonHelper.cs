@@ -353,8 +353,7 @@ public class TableExportToJsonHelper
         }
         // 生成数据内容结尾
         content.AppendLine("}");
-        string exportString = content.ToString();
-
+        string exportString = _ToTightJsonString(content.ToString());
         // 如果声明了要整理为带缩进格式的形式
         if (AppValues.ExportJsonIsFormat == true){
             exportString = _FormatJson(exportString);
@@ -1120,6 +1119,34 @@ public class TableExportToJsonHelper
         for (int i = 0; i < level; ++i)
             stringBuilder.Append(_JSON_INDENTATION_STRING);
 
+        return stringBuilder.ToString();
+    }
+
+    //将json字符串进行紧凑
+    private static string _ToTightJsonString(string inputJsonString)
+    {
+        // 将json字符串进行格式整理，去除引号之外的所有空白字符
+        StringBuilder stringBuilder = new StringBuilder();
+        bool isInQuotationMarks = false;
+
+        for (int i = 0; i < inputJsonString.Length; ++i)
+        {
+            char c = inputJsonString[i];
+
+            if (c == '"')
+            {
+                stringBuilder.Append('"');
+                if (i > 0 && inputJsonString[i - 1] != '\\')
+                    isInQuotationMarks = !isInQuotationMarks;
+            }
+            else if (c == ' ')
+            {
+                if (isInQuotationMarks == true)
+                    stringBuilder.Append(' ');
+            }
+            else if (c != '\n' && c != '\r' && c != '\t')
+                stringBuilder.Append(c);
+        }
         return stringBuilder.ToString();
     }
 }
